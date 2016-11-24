@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import { createStore } from 'redux';
 import Client from './Client';
+import { selectFoodReducer } from './Reducers';
 
 class App extends Component {
   constructor(props) {
@@ -14,16 +17,13 @@ class App extends Component {
       <div className='App'>
         <div className='ui text container'>
           <SelectedFood
-            foods={this.state.selectedFoods}
+            foodsNumber={this.props.state.number}
+            foods={this.props.state.selectedFoods}
             onFoodRemove={
               (idx) => (
-                this.setState({
-                  selectedFoods: [
-                    ...this.state.selectedFoods.slice(0, idx),
-                    ...this.state.selectedFoods.slice(
-                      idx + 1, this.state.selectedFoods.length
-                    ),
-                  ],
+                store.dispatch({
+                  type: 'REMOVE',
+                  idx,
                 })
               )
             }
@@ -31,9 +31,10 @@ class App extends Component {
           <SearchFood
             onFoodSelect={
               (food) => (
-                this.setState({
-                  selectedFoods: this.state.selectedFoods.concat(food),
-                })
+                 store.dispatch({
+                  type: 'ADD',
+                  selectedFood: food,
+                 })
               )
             }
           />
@@ -145,7 +146,7 @@ const SelectedFood = (props) => (
     <thead>
       <tr>
         <th colSpan='5'>
-          <h3>Selected foods</h3>
+          <h3>{`Selected foods: ${props.foodsNumber}`}</h3>
         </th>
       </tr>
       <tr>
@@ -192,4 +193,15 @@ const SelectedFood = (props) => (
   </table>
 );
 
-export default App;
+export const render = function() {
+  ReactDOM.render(
+    <App state={store.getState()}/>,
+    document.getElementById('root')
+  );
+};
+
+// store
+const store = createStore(selectFoodReducer);
+store.subscribe(render);
+
+
